@@ -1,5 +1,5 @@
 import gameImpl from "./gameImpl";
-import { Player, Square } from "./gameImpl";
+import { Player, Square, GameBoard } from "./gameImpl";
 
 describe("init", () => {
   test("initialises a 3x3 board", () => {
@@ -11,8 +11,8 @@ describe("init", () => {
 
 describe("make move", () => {
   const gameState = gameImpl.startGame();
-  const nought: Player = Player.O;
-  const cross: Player = Player.X;
+  const nought: Player = Player.Nought;
+  const cross: Player = Player.Cross;
 
   test("unoccupied space", () => {
     let result = gameState.makeMove(nought, 1, 1);
@@ -35,9 +35,13 @@ describe("make move", () => {
 });
 
 describe("check game status", () => {
-  const gameState = gameImpl.startGame();
-  const nought: Player = Player.O;
-  const cross: Player = Player.X;
+  let gameState: GameBoard;
+  const nought: Player = Player.Nought;
+  const cross: Player = Player.Cross;
+
+  beforeEach(() => {
+    gameState = gameImpl.startGame();
+  });
 
   test("should have 9 free spaces", () => {
     const gameStatus = gameState.checkGameStatus();
@@ -61,15 +65,26 @@ describe("check game status", () => {
       gameState.makeMove(nought, 0, 0);
       gameState.makeMove(cross, 1, 1);
       gameState.makeMove(nought, 1, 1);
-
-      const gameStatus = gameState.checkGameStatus();
-      expect(gameStatus).toMatchObject({
-        emptySlots: 7,
-        occupiedSlots: 2,
-      });
     } catch (error) {
       console.error(error);
     }
+    const gameStatus = gameState.checkGameStatus();
+    expect(gameStatus).toMatchObject({
+      emptySlots: 7,
+      occupiedSlots: 2,
+    });
+    expect(gameState.leftDiagonalCheck()).toMatchObject({
+      numNoughts: 1,
+      numCrosses: 1,
+      isFull: false,
+      stringRep: "OX_",
+    });
+    expect(gameState.rightDiagonalCheck()).toMatchObject({
+        numNoughts: 0,
+        numCrosses: 1,
+        isFull: false,
+        stringRep: "_X_",
+      });
   });
 
   test("after 9 moves (1 of which is invalid)", () => {
@@ -86,6 +101,13 @@ describe("check game status", () => {
       gameState.makeMove(nought, 2, 0);
       gameState.makeMove(cross, 2, 1);
       gameState.makeMove(nought, 2, 2);
+
+      expect(gameState.leftDiagonalCheck()).toMatchObject({
+        numNoughts: 3,
+        numCrosses: 0,
+        isFull: true,
+        stringRep: "OOO",
+      });
 
       const gameStatus = gameState.checkGameStatus();
       expect(gameStatus).toMatchObject({

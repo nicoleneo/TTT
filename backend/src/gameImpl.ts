@@ -1,6 +1,6 @@
 export enum Player {
-  "X",
-  "O",
+  Cross = "X",
+  Nought = "O",
 }
 
 export type Square = {
@@ -9,10 +9,17 @@ export type Square = {
   value: Player | null;
 };
 
+export type LineResult = {
+  numNoughts: number;
+  numCrosses: number;
+  isFull: Boolean;
+  stringRep?: string;
+};
+
 const ROWS = 3;
 const COLS = 3;
 
-class GameBoard {
+export class GameBoard {
   board: Square[][];
 
   constructor() {
@@ -43,7 +50,96 @@ class GameBoard {
     return player;
   }
 
+  checkRow(y: number): LineResult {
+    let numOccupiedInRow = 0;
+    let arrayRep = [];
+
+    for (let x = 0; x < COLS; x++) {
+      const squareInRow = this.board[x][y];
+      if (squareInRow.value != null) {
+        numOccupiedInRow++;
+      }
+      arrayRep.push(squareInRow.value ? squareInRow.value : "_");
+    }
+    return {
+      numNoughts: arrayRep.filter((val) => val == Player.Nought).length,
+      numCrosses: arrayRep.filter((val) => val == Player.Cross).length,
+      isFull: numOccupiedInRow == COLS,
+      stringRep: arrayRep.join(""),
+    };
+  }
+
+  checkCol(x: number): LineResult {
+    let numOccupiedInCol = 0;
+    let arrayRep = [];
+    for (let y = 0; y < ROWS; y++) {
+      const squareInRow = this.board[x][y];
+      if (squareInRow.value != null) {
+        numOccupiedInCol++;
+      }
+      arrayRep.push(squareInRow.value ? squareInRow.value : "_");
+    }
+    return {
+      numNoughts: arrayRep.filter((val) => val == Player.Nought).length,
+      numCrosses: arrayRep.filter((val) => val == Player.Cross).length,
+      isFull: numOccupiedInCol == ROWS,
+      stringRep: arrayRep.join(""),
+    };
+  }
+
+  leftDiagonalCheck(): LineResult {
+    let numOccupiedInDiagonal = 0;
+    let arrayRep = [];
+    for (let i = 0; i < ROWS; i++) {
+      const x = i; // 0, 1, 2
+      const y = i; // 0, 1, 2
+      const squareInDiagonal = this.board[x][y];
+      if (squareInDiagonal.value != null) {
+        numOccupiedInDiagonal++;
+      }
+      arrayRep.push(squareInDiagonal.value ? squareInDiagonal.value : "_");
+    }
+    return {
+      numNoughts: arrayRep.filter((val) => val == Player.Nought).length,
+      numCrosses: arrayRep.filter((val) => val == Player.Cross).length,
+      isFull: numOccupiedInDiagonal == ROWS,
+      stringRep: arrayRep.join(""),
+    };
+  }
+
+  rightDiagonalCheck(): LineResult {
+    let numOccupiedInDiagonal = 0;
+    let arrayRep = [];
+
+    for (let i = 0; i < ROWS; i++) {
+      const x = i; // 0, 1, 2
+      const y = ROWS - 1 - i; // 2, 1, 0
+      const squareInDiagonal = this.board[x][y];
+      if (squareInDiagonal.value != null) {
+        numOccupiedInDiagonal++;
+      }
+      arrayRep.push(squareInDiagonal.value ? squareInDiagonal.value : "_");
+    }
+    return {
+      numNoughts: arrayRep.filter((val) => val == Player.Nought).length,
+      numCrosses: arrayRep.filter((val) => val == Player.Cross).length,
+      isFull: numOccupiedInDiagonal == ROWS,
+      stringRep: arrayRep.join(""),
+    };
+  }
+
   checkGameStatus() {
+    const rowsCheck = Promise.all(
+      [0, 1, 2].map((rowNum) => this.checkRow(rowNum))
+    );
+    const colsCheck = Promise.all(
+      [0, 1, 2].map((colNum) => this.checkCol(colNum))
+    );
+
+    const leftDiagonalCheck = this.leftDiagonalCheck();
+    const rightDiagonalCheck = this.rightDiagonalCheck();
+
+
     const emptySlots = this.board.reduce((acc: number, xCol: Square[]) => {
       const emptySquaresInCol = xCol.filter((square) => square.value === null);
       acc += emptySquaresInCol.length;
@@ -73,7 +169,7 @@ const makeMove = (
 };
 
 const checkGameStatus = (gameBoard: GameBoard) => {
-    return gameBoard.checkGameStatus();
-}
+  return gameBoard.checkGameStatus();
+};
 
 export default { startGame, makeMove, checkGameStatus };
