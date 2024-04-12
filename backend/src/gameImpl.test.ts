@@ -118,4 +118,88 @@ describe("check game status", () => {
       console.error(error);
     }
   });
+
+  describe("check game status board", () => {
+    let gameState: GameBoard;
+    const nought: Player = Player.Nought;
+    const cross: Player = Player.Cross;
+  
+    beforeEach(() => {
+      gameState = gameImpl.startGame();
+    });
+
+
+   test("check state correct", () => {
+    /*
+      _X_
+      O__
+      X__
+    */
+    gameState.makeMove(cross, 1, 0);
+    gameState.makeMove(nought, 0, 1);
+    gameState.makeMove(cross, 0, 2);
+    expect(gameState.checkRow(1)).toMatchObject({
+        numNoughts: 1,
+        numCrosses: 0,
+        isFull: false,
+        stringRep: "O__",
+      });
+      expect(gameState.rightDiagonalCheck()).toMatchObject({
+        numNoughts: 0,
+        numCrosses: 1,
+        isFull: false,
+        stringRep: "X__",
+      });
+      expect(gameState.leftDiagonalCheck()).toMatchObject({
+        numNoughts: 0,
+        numCrosses: 0,
+        isFull: false,
+        stringRep: "___",
+      });
+      expect(gameState.checkGameStatus()).toMatchObject({
+        emptySlots: 6,
+        occupiedSlots: 3,
+        winner: null
+    })
+
+    /*
+      _XX
+      OO_
+      X_O
+    */
+    gameState.makeMove(nought, 1, 1);
+    gameState.makeMove(cross, 2, 0);
+    gameState.makeMove(nought, 2, 2);
+    expect(gameState.checkCol(2)).toMatchObject({
+        numNoughts: 1,
+        numCrosses: 1,
+        isFull: false,
+        stringRep: "X_O",
+      });
+
+    /*
+      XXX
+      OOX
+      XOO
+    */
+    gameState.makeMove(cross, 2, 1);
+    gameState.makeMove(nought, 1, 2);
+    gameState.makeMove(cross, 0, 0);
+    expect(gameState.checkRow(0)).toMatchObject({
+        numNoughts: 0,
+        numCrosses: 3,
+        isFull: true,
+        stringRep: "XXX",
+      });
+
+    expect(gameState.checkGameStatus()).toMatchObject({
+        emptySlots: 0,
+        occupiedSlots: 9,
+        winner: Player.Cross
+    })
+
+   });
+
+  })
+
 });

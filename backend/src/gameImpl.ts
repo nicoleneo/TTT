@@ -14,6 +14,7 @@ export type LineResult = {
   numCrosses: number;
   isFull: Boolean;
   stringRep?: string;
+  id: string;
 };
 
 const ROWS = 3;
@@ -66,6 +67,7 @@ export class GameBoard {
       numCrosses: arrayRep.filter((val) => val == Player.Cross).length,
       isFull: numOccupiedInRow == COLS,
       stringRep: arrayRep.join(""),
+      id: "row #" + y + " check",
     };
   }
 
@@ -84,6 +86,7 @@ export class GameBoard {
       numCrosses: arrayRep.filter((val) => val == Player.Cross).length,
       isFull: numOccupiedInCol == ROWS,
       stringRep: arrayRep.join(""),
+      id: "col #" + x + " check",
     };
   }
 
@@ -104,6 +107,7 @@ export class GameBoard {
       numCrosses: arrayRep.filter((val) => val == Player.Cross).length,
       isFull: numOccupiedInDiagonal == ROWS,
       stringRep: arrayRep.join(""),
+      id: "leftDiagonalCheck",
     };
   }
 
@@ -125,20 +129,29 @@ export class GameBoard {
       numCrosses: arrayRep.filter((val) => val == Player.Cross).length,
       isFull: numOccupiedInDiagonal == ROWS,
       stringRep: arrayRep.join(""),
+      id: "rightDiagonalCheck",
     };
   }
 
   checkGameStatus() {
-    const rowsCheck = Promise.all(
-      [0, 1, 2].map((rowNum) => this.checkRow(rowNum))
+    let winner = null;
+    let rowsCheck: LineResult[] = [0, 1, 2].map((rowNum) =>
+      this.checkRow(rowNum)
     );
-    const colsCheck = Promise.all(
-      [0, 1, 2].map((colNum) => this.checkCol(colNum))
+
+    let colsCheck: LineResult[] = [0, 1, 2].map((colNum) =>
+      this.checkCol(colNum)
     );
 
     const leftDiagonalCheck = this.leftDiagonalCheck();
     const rightDiagonalCheck = this.rightDiagonalCheck();
 
+    const lineChecks = [
+      ...rowsCheck,
+      ...colsCheck,
+      leftDiagonalCheck,
+      rightDiagonalCheck,
+    ];
 
     const emptySlots = this.board.reduce((acc: number, xCol: Square[]) => {
       const emptySquaresInCol = xCol.filter((square) => square.value === null);
@@ -147,9 +160,21 @@ export class GameBoard {
     }, 0);
 
     const occupiedSlots = ROWS * COLS - emptySlots;
+
+    const anyWinners = lineChecks.filter((lineCheck) => {
+      return (lineCheck.numCrosses > 2 || lineCheck.numNoughts > 2);
+    });
+    if (anyWinners.length > 0) {
+      const winningLine = anyWinners[0];
+      const noughtsResult = winningLine.numNoughts;
+      const crossesResult = winningLine.numCrosses;
+      winner = noughtsResult > crossesResult ? Player.Nought : Player.Cross;
+    }
+
     return {
       emptySlots,
       occupiedSlots,
+      winner,
     };
   }
 }
