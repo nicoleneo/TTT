@@ -11,7 +11,7 @@ export const Game = () => {
   );
   const [board, setBoard] = React.useState<BoardType>([]);
   const [activeGame, setActiveGame] = React.useState<boolean>(false);
-  const [winner, setWinner] = React.useState<PlayerType | null>(null);
+  const [winner, setWinner] = React.useState<PlayerType | null | boolean>(null);
 
   const newGame = () => {
     // TODO: clear state
@@ -48,7 +48,7 @@ export const Game = () => {
         </Paper>
         <Paper sx={{ m: "16px", p: "16px" }}>
           {activeGame && `Current Player: ${currentPlayer}`}
-          {winner && `Winner is ${winner}`}
+          {!activeGame && winner === false ? "Draw" : !activeGame && winner ? `Winner is ${winner}` : ""}
         </Paper>
       </Grid>
     </Grid>

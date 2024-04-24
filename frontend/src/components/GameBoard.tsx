@@ -17,7 +17,7 @@ type GameBoardProps = {
   setBoard: (board: BoardType) => void;
   setActiveGame(activeGame: boolean): void;
   activeGame: boolean;
-  setWinner(winner: PlayerType): void;
+  setWinner(winner: PlayerType | boolean): void;
   setCurrentPlayer(player: PlayerType): void;
 };
 
@@ -28,7 +28,7 @@ export const GameBoard = ({
   setActiveGame,
   activeGame,
   setWinner,
-  setCurrentPlayer
+  setCurrentPlayer,
 }: GameBoardProps) => {
   useEffect(() => {
     console.log("board", board);
@@ -69,7 +69,9 @@ export const GameBoard = ({
 
         if (winner || emptySlots === 0) {
           setActiveGame(false);
-          setWinner(winner);
+          if (winner === null) {
+            setWinner(false);
+          } else setWinner(winner);
         } else {
           changePlayer();
         }
