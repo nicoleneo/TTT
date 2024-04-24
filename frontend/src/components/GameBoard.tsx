@@ -6,10 +6,10 @@ import React, { useEffect } from "react";
 const ROWS = 3;
 const COLS = 3;
 
-  /**
-   * The backend URL to make requests to
-   */
-  const BACKEND = "";
+/**
+ * The backend URL to make requests to
+ */
+const BACKEND = "";
 
 type GameBoardProps = {
   currentPlayer: PlayerType; // Assuming PlayerType is the type of currentPlayer
@@ -17,6 +17,8 @@ type GameBoardProps = {
   setBoard: (board: BoardType) => void;
   setActiveGame(activeGame: boolean): void;
   activeGame: boolean;
+  setWinner(winner: PlayerType): void;
+  setCurrentPlayer(player: PlayerType): void;
 };
 
 export const GameBoard = ({
@@ -24,13 +26,21 @@ export const GameBoard = ({
   board,
   setBoard,
   setActiveGame,
-  activeGame
+  activeGame,
+  setWinner,
+  setCurrentPlayer
 }: GameBoardProps) => {
-
   useEffect(() => {
     console.log("board", board);
   }, [board]);
 
+  const changePlayer = () => {
+    if (currentPlayer === PlayerType.Cross) {
+      setCurrentPlayer(PlayerType.Nought);
+    } else {
+      setCurrentPlayer(PlayerType.Cross);
+    }
+  };
   /**
    * Make a move on the game board
    * @param player The player making the move
@@ -53,9 +63,16 @@ export const GameBoard = ({
         console.log(data);
         const {
           value,
-          gameStatus: { board },
+          gameStatus: { board, emptySlots, occupiedSlots, winner },
         } = data;
         setBoard(board);
+
+        if (winner || emptySlots === 0) {
+          setActiveGame(false);
+          setWinner(winner);
+        } else {
+          changePlayer();
+        }
       })
       .catch((error) => console.log(error));
   };

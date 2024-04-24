@@ -11,6 +11,7 @@ export const Game = () => {
   );
   const [board, setBoard] = React.useState<BoardType>([]);
   const [activeGame, setActiveGame] = React.useState<boolean>(false);
+  const [winner, setWinner] = React.useState<PlayerType | null>(null);
 
   const newGame = () => {
     // TODO: clear state
@@ -23,29 +24,31 @@ export const Game = () => {
         setBoard(data.board);
       })
       .catch((error) => console.log(error));
-    setCurrentPlayer(PlayerType.Cross);
+    setCurrentPlayer(PlayerType.Cross); // first player
     setActiveGame(true);
+    setWinner(null);
   };
 
-  const changePlayer = () => {
-    if (currentPlayer === PlayerType.Cross) {
-      setCurrentPlayer(PlayerType.Nought);
-    } else {
-      setCurrentPlayer(PlayerType.Cross);
-    }
-  };
   return (
     <Grid container spacing={2}>
       <Grid item xs={8}>
-        <GameBoard currentPlayer={currentPlayer} board={board} setBoard={setBoard} activeGame={activeGame} setActiveGame={setActiveGame} />
+        <GameBoard
+          currentPlayer={currentPlayer}
+          board={board}
+          setBoard={setBoard}
+          activeGame={activeGame}
+          setActiveGame={setActiveGame}
+          setWinner={setWinner}
+          setCurrentPlayer={setCurrentPlayer}
+        />
       </Grid>
       <Grid item xs={4} sx={{ padding: 20 }}>
-        <Paper>
+        <Paper sx={{ m: "16px", p: "16px" }}>
           <Button onClick={newGame}>Reset</Button>
         </Paper>
-        <Paper>
-          Change Player (Click to changePlayer):
-          <Button onClick={changePlayer}>{currentPlayer}</Button>
+        <Paper sx={{ m: "16px", p: "16px" }}>
+          {activeGame && `Current Player: ${currentPlayer}`}
+          {winner && `Winner is ${winner}`}
         </Paper>
       </Grid>
     </Grid>
