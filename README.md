@@ -1,11 +1,11 @@
 
 ## Noughts and crosses
 ## Game representation
-A 3x3 game board is represented as a 2D array of rows and columns.
+A 3x3 game board is represented as a 2D array of rows and columns. Coordinates start from zero on the top-left.
 
-0,0 | 1,0 | 2,0
-0,1 | 1,1 | 2,1
-0,2 | 1,2 | 2,2
+| 0,0 | 1,0 | 2,0 |
+| 0,1 | 1,1 | 2,1 |
+| 0,2 | 1,2 | 2,2 |
 
 
 ## Backend
