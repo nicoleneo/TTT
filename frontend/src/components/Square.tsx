@@ -1,10 +1,11 @@
 import React from "react";
 import { FaXmark, FaO, FaRegSquare } from "react-icons/fa6";
-import { Paper, Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { MouseEvent, MouseEventHandler } from "react";
+import { PlayerType } from "../types";
 
-const Item = styled(Paper)(({ theme }) => ({
+const Item = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
   ...theme.typography.body2,
   padding: theme.spacing(1),
@@ -12,21 +13,14 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export enum PlayerType {
-  Cross = "X",
-  Nought = "O",
-}
-
-type SquareType = {
-  x: number;
-  y: number;
-  value: PlayerType | null;
-};
 
 interface SquareProps {
   x: number;
   y: number;
   currentPlayer: PlayerType;
+  value: PlayerType | null;
+  makeMove: (currentPlayer: PlayerType, x: number, y: number) => void;
+  activeGame: boolean;
 }
 
 interface SquareState {
@@ -45,21 +39,7 @@ const valueRender = (value: PlayerType | null) => {
   }
 };
 
-export const Square: React.FC<SquareProps> = (props: SquareProps) => {
-  const [squareState, setSquareState] = React.useState<SquareState>({
-    x: -1,
-    y: -1,
-    value: null,
-  });
-
-  const makeMove = (player: PlayerType, x: number, y: number) => {
-    // TODO: make API call to make move
-    setSquareState({
-      x,
-      y,
-      value: player,
-    });
-  };
+export const Square: React.FC<SquareProps> = ({currentPlayer, x, y, value, makeMove, activeGame}: SquareProps) => {
 
   return (
     <Item
@@ -70,9 +50,10 @@ export const Square: React.FC<SquareProps> = (props: SquareProps) => {
         alignItems: "center",
         aspectRatio: "1/1",
       }}
-      onClick={() => makeMove(props.currentPlayer, props.x, props.y)}
+      disabled={!activeGame}
+      onClick={() => makeMove(currentPlayer, x, y)}
     >
-      {valueRender(squareState.value)}
+      {valueRender(value)}
     </Item>
   );
 };

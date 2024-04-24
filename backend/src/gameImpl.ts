@@ -20,6 +20,8 @@ export type LineResult = {
 const ROWS = 3;
 const COLS = 3;
 
+let gameBoard: GameBoard;
+
 export class GameBoard {
   board: Square[][];
 
@@ -162,7 +164,7 @@ export class GameBoard {
     const occupiedSlots = ROWS * COLS - emptySlots;
 
     const anyWinners = lineChecks.filter((lineCheck) => {
-      return (lineCheck.numCrosses > 2 || lineCheck.numNoughts > 2);
+      return lineCheck.numCrosses > 2 || lineCheck.numNoughts > 2;
     });
     if (anyWinners.length > 0) {
       const winningLine = anyWinners[0];
@@ -172,6 +174,7 @@ export class GameBoard {
     }
 
     return {
+      board: this.board,
       emptySlots,
       occupiedSlots,
       winner,
@@ -180,20 +183,15 @@ export class GameBoard {
 }
 
 const startGame = (): GameBoard => {
-  const gameBoard = new GameBoard();
+  gameBoard = new GameBoard();
   return gameBoard;
 };
 
-const makeMove = (
-  gameBoard: GameBoard,
-  player: Player,
-  x: number,
-  y: number
-) => {
+const makeMove = (player: Player, x: number, y: number) => {
   return gameBoard.makeMove(player, x, y);
 };
 
-const checkGameStatus = (gameBoard: GameBoard) => {
+const checkGameStatus = () => {
   return gameBoard.checkGameStatus();
 };
 
