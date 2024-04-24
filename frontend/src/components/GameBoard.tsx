@@ -9,7 +9,7 @@ const COLS = 3;
 /**
  * The backend URL to make requests to
  */
-const BACKEND = "";
+const BACKEND = "/api";
 
 type GameBoardProps = {
   currentPlayer: PlayerType; // Assuming PlayerType is the type of currentPlayer

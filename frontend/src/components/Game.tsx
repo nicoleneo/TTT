@@ -3,7 +3,7 @@ import { SquareType, PlayerType, BoardType } from "../types";
 import React, { useEffect, useState } from "react";
 import { GameBoard } from "./GameBoard";
 
-const BACKEND = "";
+const BACKEND = "/api";
 
 export const Game = () => {
   const [currentPlayer, setCurrentPlayer] = React.useState<PlayerType>(
@@ -14,10 +14,13 @@ export const Game = () => {
   const [winner, setWinner] = React.useState<PlayerType | null | boolean>(null);
 
   const newGame = () => {
-    // TODO: clear state
-    // TODO: API call
     console.log("new game");
-    fetch(`${BACKEND}/start-game`)
+    fetch(`${BACKEND}/start-game`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -48,7 +51,11 @@ export const Game = () => {
         </Paper>
         <Paper sx={{ m: "16px", p: "16px" }}>
           {activeGame && `Current Player: ${currentPlayer}`}
-          {!activeGame && winner === false ? "Draw" : !activeGame && winner ? `Winner is ${winner}` : ""}
+          {!activeGame && winner === false
+            ? "Draw"
+            : !activeGame && winner
+            ? `Winner is ${winner}`
+            : ""}
         </Paper>
       </Grid>
     </Grid>
