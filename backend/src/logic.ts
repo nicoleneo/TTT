@@ -1,5 +1,6 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient } from "mongodb";
 
+const uri = process.env.MONGODB_URI || "mongodb://localhost:27017";
 
 /**
  * Connects to a MongoDB cluster using the provided connection string
@@ -7,19 +8,19 @@ import { MongoClient } from 'mongodb';
  * @returns A Promise that resolves to an instance of the MongoClient class when the database is successfully connected
  */
 async function main(uri: string): Promise<MongoClient> {
-    const client = new MongoClient(uri);
+  const client = new MongoClient(uri);
 
-    try {
-        // Connect to the MongoDB cluster
-        await client.connect();
-        // print a message when the database is successfully connected
-        console.log('Database Connected');
+  try {
+    // Connect to the MongoDB cluster
+    await client.connect();
+    // print a message when the database is successfully connected
+    console.log("Database Connected");
 
-        return client;
-    } catch (e) {
-        console.error(e);
-        throw e;
-    } finally {
-        await client.close();
-    }
+    return client;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  } finally {
+    await client.close();
+  }
 }

@@ -34,13 +34,6 @@ export const GameBoard = ({
     console.log("board", board);
   }, [board]);
 
-  const changePlayer = () => {
-    if (currentPlayer === PlayerType.Cross) {
-      setCurrentPlayer(PlayerType.Nought);
-    } else {
-      setCurrentPlayer(PlayerType.Cross);
-    }
-  };
   /**
    * Make a move on the game board
    * @param player The player making the move
@@ -63,7 +56,7 @@ export const GameBoard = ({
         console.log(data);
         const {
           value,
-          gameStatus: { board, emptySlots, occupiedSlots, winner },
+          gameStatus: { board, emptySlots, occupiedSlots, winner, gameId, nextPlayer },
         } = data;
         setBoard(board);
 
@@ -73,7 +66,7 @@ export const GameBoard = ({
             setWinner(false);
           } else setWinner(winner);
         } else {
-          changePlayer();
+          setCurrentPlayer(nextPlayer);
         }
       })
       .catch((error) => console.log(error));

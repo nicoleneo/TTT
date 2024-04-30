@@ -19,6 +19,8 @@ export type LineResult = {
   id: string;
 };
 
+
+
 const ROWS = 3;
 const COLS = 3;
 
@@ -27,6 +29,7 @@ let gameBoard: GameBoard;
 export class GameBoard {
   board: Square[][];
   gameId: string;
+  currentPlayer: Player;
 
   constructor() {
     this.board = [];
@@ -44,7 +47,17 @@ export class GameBoard {
     const translator = short();
     const shortUuid = translator.new();
     this.gameId = shortUuid;
+    this.currentPlayer = Player.Cross;
   }
+
+  changePlayer(){
+    if (this.currentPlayer === Player.Cross) {
+      this.currentPlayer = Player.Nought;
+    } else {
+      this.currentPlayer = Player.Cross;
+    }
+    return this.currentPlayer;
+  };
 
   makeMove(player: Player, x: number, y: number): Player | Error {
     if (x >= 3 || y >= 3 || x < 0 || y < 0) {
@@ -178,12 +191,15 @@ export class GameBoard {
       const crossesResult = winningLine.numCrosses;
       winner = noughtsResult > crossesResult ? Player.Nought : Player.Cross;
     }
+    const nextPlayer = this.changePlayer();
 
     return {
       board: this.board,
       emptySlots,
       occupiedSlots,
       winner,
+      gameId: this.gameId,
+      nextPlayer
     };
   }
 }

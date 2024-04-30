@@ -27,9 +27,9 @@ export const Game = () => {
         console.log(data);
         setBoard(data.board);
         setGameId(data.gameId);
+        setCurrentPlayer(data.currentPlayer); // first player
       })
       .catch((error) => console.log(error));
-    setCurrentPlayer(PlayerType.Cross); // first player
     setActiveGame(true);
     setWinner(null);
   };
