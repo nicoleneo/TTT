@@ -6,6 +6,7 @@ import { GameBoard } from "./GameBoard";
 const BACKEND = "/api";
 
 export const Game = () => {
+  const [gameId, setGameId] = React.useState<string>("");
   const [currentPlayer, setCurrentPlayer] = React.useState<PlayerType>(
     PlayerType.Cross
   );
@@ -25,6 +26,7 @@ export const Game = () => {
       .then((data) => {
         console.log(data);
         setBoard(data.board);
+        setGameId(data.gameId);
       })
       .catch((error) => console.log(error));
     setCurrentPlayer(PlayerType.Cross); // first player
@@ -47,6 +49,7 @@ export const Game = () => {
       </Grid>
       <Grid item xs={4} sx={{ padding: 20 }}>
         <Paper sx={{ m: "16px", p: "16px" }}>
+        {activeGame && `Game ID: ${gameId}`}
           <Button onClick={newGame}>Reset</Button>
         </Paper>
         <Paper sx={{ m: "16px", p: "16px" }}>

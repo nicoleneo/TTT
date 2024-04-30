@@ -1,3 +1,5 @@
+import short from 'short-uuid';
+
 export enum Player {
   Cross = "X",
   Nought = "O",
@@ -24,6 +26,7 @@ let gameBoard: GameBoard;
 
 export class GameBoard {
   board: Square[][];
+  gameId: string;
 
   constructor() {
     this.board = [];
@@ -38,6 +41,9 @@ export class GameBoard {
         this.board[x][y] = square;
       }
     }
+    const translator = short();
+    const shortUuid = translator.new();
+    this.gameId = shortUuid;
   }
 
   makeMove(player: Player, x: number, y: number): Player | Error {
