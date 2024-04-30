@@ -30,3 +30,11 @@ services:
     tty: true
     stdin_open: true
     depends_on: ["backend"]
+
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data:/data/db
+    depends_on: ["backend"]

@@ -15,7 +15,7 @@ export type GameStatusType = {
   occupiedSlots: number;
   winner: PlayerType | boolean;
   gameId: string;
-  nextPlayer: PlayerType;
+  currentPlayer: PlayerType;
 }
 
 export type BoardType = SquareType[][];

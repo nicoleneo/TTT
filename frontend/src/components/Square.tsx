@@ -18,6 +18,7 @@ interface SquareProps {
   x: number;
   y: number;
   currentPlayer: PlayerType;
+  isPlayerTurn: boolean;
   value: PlayerType | null;
   makeMove: (currentPlayer: PlayerType, x: number, y: number) => void;
   activeGame: boolean;
@@ -39,7 +40,7 @@ const valueRender = (value: PlayerType | null) => {
   }
 };
 
-export const Square: React.FC<SquareProps> = ({currentPlayer, x, y, value, makeMove, activeGame}: SquareProps) => {
+export const Square: React.FC<SquareProps> = ({currentPlayer, x, y, value, makeMove, activeGame, isPlayerTurn}: SquareProps) => {
 
   return (
     <Item
@@ -50,7 +51,7 @@ export const Square: React.FC<SquareProps> = ({currentPlayer, x, y, value, makeM
         alignItems: "center",
         aspectRatio: "1/1",
       }}
-      disabled={!activeGame}
+      disabled={!activeGame || !isPlayerTurn}
       onClick={() => makeMove(currentPlayer, x, y)}
     >
       {valueRender(value)}

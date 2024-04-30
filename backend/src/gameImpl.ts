@@ -1,25 +1,6 @@
-import short from 'short-uuid';
-
-export enum Player {
-  Cross = "X",
-  Nought = "O",
-}
-
-export type Square = {
-  x: number;
-  y: number;
-  value: Player | null;
-};
-
-export type LineResult = {
-  numNoughts: number;
-  numCrosses: number;
-  isFull: Boolean;
-  stringRep?: string;
-  id: string;
-};
-
-
+import short from "short-uuid";
+import { LineResult, Player, Square } from "./types";
+import { saveGame, retrieveGame } from "./logic";
 
 const ROWS = 3;
 const COLS = 3;
@@ -31,33 +12,41 @@ export class GameBoard {
   gameId: string;
   currentPlayer: Player;
 
-  constructor() {
-    this.board = [];
-    for (let x = 0; x < COLS; x++) {
-      this.board[x] = [];
-      for (let y = 0; y < ROWS; y++) {
-        const square: Square = {
-          x,
-          y,
-          value: null,
-        };
-        this.board[x][y] = square;
+  constructor();
+  constructor(gameId: string, board: Square[][], currentPlayer: Player);
+  constructor(gameId?: string, board?: Square[][], currentPlayer?: Player) {
+    if (board && gameId && currentPlayer) {
+      this.board = board;
+      this.gameId = gameId;
+      this.currentPlayer = currentPlayer;
+    } else {
+      this.board = [];
+      for (let x = 0; x < COLS; x++) {
+        this.board[x] = [];
+        for (let y = 0; y < ROWS; y++) {
+          const square: Square = {
+            x,
+            y,
+            value: null,
+          };
+          this.board[x][y] = square;
+        }
       }
+      const translator = short();
+      const shortUuid = translator.new();
+      this.gameId = shortUuid;
+      this.currentPlayer = Player.Cross;
     }
-    const translator = short();
-    const shortUuid = translator.new();
-    this.gameId = shortUuid;
-    this.currentPlayer = Player.Cross;
   }
 
-  changePlayer(){
+  changePlayer() {
     if (this.currentPlayer === Player.Cross) {
       this.currentPlayer = Player.Nought;
     } else {
       this.currentPlayer = Player.Cross;
     }
     return this.currentPlayer;
-  };
+  }
 
   makeMove(player: Player, x: number, y: number): Player | Error {
     if (x >= 3 || y >= 3 || x < 0 || y < 0) {
@@ -69,6 +58,7 @@ export class GameBoard {
       throw new Error("Error! square is already occupied");
     }
     this.board[x][y].value = player;
+    this.changePlayer(); // change player as the current player's move is completed
     return player;
   }
 
@@ -191,30 +181,42 @@ export class GameBoard {
       const crossesResult = winningLine.numCrosses;
       winner = noughtsResult > crossesResult ? Player.Nought : Player.Cross;
     }
-    const nextPlayer = this.changePlayer();
-
     return {
       board: this.board,
       emptySlots,
       occupiedSlots,
       winner,
       gameId: this.gameId,
-      nextPlayer
+      currentPlayer: this.currentPlayer,
     };
   }
 }
 
-const startGame = (): GameBoard => {
+const startGame = async (): Promise<GameBoard> => {
   gameBoard = new GameBoard();
+  await saveGame(
+    gameBoard.gameId,
+    gameBoard.board,
+    ROWS * COLS,
+    0,
+    null,
+    gameBoard.currentPlayer
+  );
   return gameBoard;
 };
 
-const makeMove = (player: Player, x: number, y: number) => {
-  return gameBoard.makeMove(player, x, y);
+const joinGame = async (gameId: string): Promise<GameBoard> => {
+  const existingGame = await retrieveGame(gameId);
+  const { board, currentPlayer } = existingGame;
+  const gameBoard = new GameBoard(gameId, board, currentPlayer);
+  return gameBoard;
 };
 
-const checkGameStatus = () => {
-  return gameBoard.checkGameStatus();
-};
+const reconstructGameFromDb = async (gameId: string) => {
+  const existingGame = await retrieveGame(gameId);
+  const { board, currentPlayer } = existingGame;
+  const gameBoard = new GameBoard(gameId, board, currentPlayer);
+  return gameBoard;
+}
 
-export default { startGame, makeMove, checkGameStatus };
+export default { startGame, joinGame, reconstructGameFromDb };

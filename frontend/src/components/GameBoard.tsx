@@ -13,26 +13,32 @@ const BACKEND = "/api";
 
 type GameBoardProps = {
   currentPlayer: PlayerType; // Assuming PlayerType is the type of currentPlayer
+  clientPlayer: PlayerType; // what player this client is
   board: BoardType;
   setBoard: (board: BoardType) => void;
   setActiveGame(activeGame: boolean): void;
   activeGame: boolean;
   setWinner(winner: PlayerType | boolean): void;
   setCurrentPlayer(player: PlayerType): void;
+  gameId: string;
 };
 
 export const GameBoard = ({
   currentPlayer,
+  clientPlayer,
   board,
   setBoard,
   setActiveGame,
   activeGame,
   setWinner,
   setCurrentPlayer,
+  gameId
 }: GameBoardProps) => {
+  const [isPlayerTurn, setIsPlayerTurn] = React.useState<boolean>(false);
+
   const setGameStatus = useCallback(
     (gameStatus: GameStatusType) => {
-      const { board, emptySlots, occupiedSlots, winner, gameId, nextPlayer } =
+      const { board, emptySlots, occupiedSlots, winner, gameId, currentPlayer } =
         gameStatus;
       setBoard(board);
 
@@ -42,11 +48,22 @@ export const GameBoard = ({
           setWinner(false);
         } else setWinner(winner);
       } else {
-        setCurrentPlayer(nextPlayer);
+        setCurrentPlayer(currentPlayer);
       }
     },
     [setBoard, setActiveGame, setWinner, setCurrentPlayer]
   );
+
+  useEffect(() => {
+    console.log("currentPlayer changed", currentPlayer);
+    console.log("clientPlayer", clientPlayer);
+
+    if (currentPlayer === clientPlayer) {
+      setIsPlayerTurn(true);
+    } else {
+      setIsPlayerTurn(false);
+    }
+  }, [clientPlayer, currentPlayer]);
 
   useEffect(() => {
     console.log("board", board);
@@ -56,7 +73,7 @@ export const GameBoard = ({
     if (activeGame) {
       const intervalId = setInterval(() => {
         console.log("polling state");
-        fetch(`${BACKEND}/get-game-state`)
+        fetch(`${BACKEND}/get-game-state/${gameId}`, )
           .then((response) => response.json())
           .then((data) => {
             console.log("setting state");
@@ -77,7 +94,7 @@ export const GameBoard = ({
         clearInterval(intervalId);
       };
     }
-  }, [setGameStatus, activeGame]);
+  }, [setGameStatus, activeGame, gameId]);
 
   /**
    * Make a move on the game board
@@ -94,13 +111,14 @@ export const GameBoard = ({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ player, x, y }),
+      body: JSON.stringify({ gameId, player, x, y }),
     })
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
         const { value, gameStatus } = data;
         setGameStatus(gameStatus);
+        setIsPlayerTurn(false); // wait for opponent's move
       })
       .catch((error) => console.log(error));
   };
@@ -124,6 +142,7 @@ export const GameBoard = ({
                   x={x}
                   y={y}
                   activeGame={activeGame}
+                  isPlayerTurn={isPlayerTurn}
                 />
               </Grid>
             ));
