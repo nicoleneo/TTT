@@ -1,7 +1,7 @@
 import { Paper, Grid, Box } from "@mui/material";
-import { SquareType, PlayerType, BoardType } from "../types";
+import { SquareType, PlayerType, BoardType, GameStatusType } from "../types";
 import { Square } from "./Square";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 
 const ROWS = 3;
 const COLS = 3;
@@ -30,9 +30,54 @@ export const GameBoard = ({
   setWinner,
   setCurrentPlayer,
 }: GameBoardProps) => {
+  const setGameStatus = useCallback(
+    (gameStatus: GameStatusType) => {
+      const { board, emptySlots, occupiedSlots, winner, gameId, nextPlayer } =
+        gameStatus;
+      setBoard(board);
+
+      if (winner || emptySlots === 0) {
+        setActiveGame(false);
+        if (winner === null) {
+          setWinner(false);
+        } else setWinner(winner);
+      } else {
+        setCurrentPlayer(nextPlayer);
+      }
+    },
+    [setBoard, setActiveGame, setWinner, setCurrentPlayer]
+  );
+
   useEffect(() => {
     console.log("board", board);
   }, [board]);
+
+  useEffect(() => {
+    if (activeGame) {
+      const intervalId = setInterval(() => {
+        console.log("polling state");
+        fetch(`${BACKEND}/get-game-state`)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("setting state");
+            const gameStatus = data;
+            setGameStatus(gameStatus);
+            if (!activeGame) {
+              console.log("clear timer");
+              clearInterval(intervalId);
+              return;
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+          });
+      }, 5000); // Poll every 5 seconds
+
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [setGameStatus, activeGame]);
 
   /**
    * Make a move on the game board
@@ -54,20 +99,8 @@ export const GameBoard = ({
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        const {
-          value,
-          gameStatus: { board, emptySlots, occupiedSlots, winner, gameId, nextPlayer },
-        } = data;
-        setBoard(board);
-
-        if (winner || emptySlots === 0) {
-          setActiveGame(false);
-          if (winner === null) {
-            setWinner(false);
-          } else setWinner(winner);
-        } else {
-          setCurrentPlayer(nextPlayer);
-        }
+        const { value, gameStatus } = data;
+        setGameStatus(gameStatus);
       })
       .catch((error) => console.log(error));
   };
